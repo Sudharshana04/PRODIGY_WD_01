@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stopwatch App</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background: url('stopwatch.png') center/cover no-repeat;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #stopwatch {
+      font-size: 2em;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    #buttons {
+      margin-top: 20px;
+    }
+
+    #lapTimes {
+      text-align: left;
+      margin-top: 20px;
+      color: #fff;
+    }
+
+    #totalTime {
+      margin-top: 10px;
+      color: #fff;
+    }
+
+    #buttons button {
+      margin: 5px;
+      padding: 10px;
+      font-size: 1em;
+    }
+
+    #buttons label {
+      color: #fff;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="stopwatch">00:00:00.000</div>
+<div id="buttons">
+  <button onclick="startStop()">Start</button>
+  <button onclick="pauseResume()">Pause</button>
+  <button onclick="recordLap()">Lap</button>
+  <button onclick="reset()">Reset</button>
+  <label><input type="checkbox" id="showMilliseconds" onchange="toggleMilliseconds()"> Show Milliseconds</label>
+</div>
+<div id="lapTimes"></div>
+<div id="totalTime"></div>
+
+<script>
+  var stopwatchInterval;
+  var startTime;
+  var elapsedTime = 0;
+  var laps = [];
+  var showMilliseconds = true;
+
+  function startStop() {
+    var button = document.querySelector('#buttons button:nth-child(1)');
+    if (button.innerHTML === 'Start') {
+      startTime = new Date().getTime() - elapsedTime;
+      stopwatchInterval = setInterval(updateStopwatch, 10);
+      button.innerHTML = 'Stop';
+    } else {
+      clearInterval(stopwatchInterval);
+      button.innerHTML = 'Start';
+    }
+  }
+
+  function pauseResume() {
+    var button = document.querySelector('#buttons button:nth-child(2)');
+    if (button.innerHTML === 'Pause') {
+      clearInterval(stopwatchInterval);
+      button.innerHTML = 'Resume';
+    } else if (button.innerHTML === 'Resume') {
+      startTime = new Date().getTime() - elapsedTime;
+      stopwatchInterval = setInterval(updateStopwatch, 10);
+      button.innerHTML = 'Pause';
+    }
+  }
+
+  function updateStopwatch() {
+    var currentTime = new Date().getTime();
+    elapsedTime = currentTime - startTime;
+    displayTime(elapsedTime);
+  }
+
+  function displayTime(time) {
+    var minutes = Math.floor(time / (60 * 1000));
+    var seconds = Math.floor((time % (60 * 1000)) / 1000);
+    var milliseconds = time % 1000;
+
+    minutes = minutes.toString().padStart(2, '0');
+    seconds = seconds.toString().padStart(2, '0');
+    milliseconds = milliseconds.toString().padStart(3, '0');
+
+    if (showMilliseconds) {
+      document.getElementById('stopwatch').innerHTML = `${minutes}:${seconds}:${milliseconds}`;
+    } else {
+      document.getElementById('stopwatch').innerHTML = `${minutes}:${seconds}`;
+    }
+  }
+
+  function recordLap() {
+    var lapTime = elapsedTime;
+    laps.push(lapTime);
+
+    var lapIndex = laps.length;
+    var lapMinutes = Math.floor(lapTime / (60 * 1000));
+    var lapSeconds = Math.floor((lapTime % (60 * 1000)) / 1000);
+    var lapMilliseconds = lapTime % 1000;
+
+    lapMinutes = lapMinutes.toString().padStart(2, '0');
+    lapSeconds = lapSeconds.toString().padStart(2, '0');
+    lapMilliseconds = lapMilliseconds.toString().padStart(3, '0');
+
+    var lapText = `Lap ${lapIndex}: ${lapMinutes}:${lapSeconds}:${lapMilliseconds}<br>`;
+    document.getElementById('lapTimes').innerHTML += lapText;
+
+    updateTotalTime();
+  }
+
+  function reset() {
+    clearInterval(stopwatchInterval);
+    elapsedTime = 0;
+    laps = [];
+    displayTime(elapsedTime);
+    document.getElementById('buttons').innerHTML = '<button onclick="startStop()">Start</button><button onclick="pauseResume()">Pause</button><button onclick="recordLap()">Lap</button><button onclick="reset()">Reset</button><label><input type="checkbox" id="showMilliseconds" onchange="toggleMilliseconds()"> Show Milliseconds</label>';
+    document.getElementById('lapTimes').innerHTML = '';
+    document.getElementById('totalTime').innerHTML = '';
+  }
+
+  function toggleMilliseconds() {
+    showMilliseconds = document.getElementById('showMilliseconds').checked;
+    displayTime(elapsedTime);
+  }
+
+  function updateTotalTime() {
+    var totalElapsedTime = laps.reduce((acc, lap) => acc + lap, 0);
+    var totalMinutes = Math.floor(totalElapsedTime / (60 * 1000));
+    var totalSeconds = Math.floor((totalElapsedTime % (60 * 1000)) / 1000);
+    var totalMilliseconds = totalElapsedTime % 1000;
+
+    totalMinutes = totalMinutes.toString().padStart(2, '0');
+    totalSeconds = totalSeconds.toString().padStart(2, '0');
+    totalMilliseconds = totalMilliseconds.toString().padStart(3, '0');
+
+    document.getElementById('totalTime').innerHTML = `Total Time: ${totalMinutes}:${totalSeconds}:${totalMilliseconds}`;
+  }
+</script>
+
+</body>
+</html>

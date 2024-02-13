@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(to right, #2196f3, #e91e63);
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 5px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      font-size: 2em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #ccc;
+      cursor: pointer;
+    }
+
+    .cell:hover {
+      background-color: #f0f0f0;
+    }
+
+    #winner-notification {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px;
+      font-size: 1.5em;
+      color: #fff;
+      background: linear-gradient(to right, #2196f3, #e91e63);
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div id="board"></div>
+<div id="winner-notification"></div>
+
+<script>
+  // Game state
+  let currentPlayer = 'X';
+  let board = ['', '', '', '', '', '', '', '', ''];
+  let gameActive = true;
+
+  // Reference to the board and notification elements
+  const boardElement = document.getElementById('board');
+  const winnerNotification = document.getElementById('winner-notification');
+
+  // Create the initial board
+  for (let i = 0; i < 9; i++) {
+    const cell = document.createElement('div');
+    cell.classList.add('cell');
+    cell.addEventListener('click', () => cellClick(i));
+    boardElement.appendChild(cell);
+  }
+
+  // Handle cell click
+  function cellClick(index) {
+    if (!gameActive || board[index] !== '') {
+      return;
+    }
+
+    // Update the board
+    board[index] = currentPlayer;
+
+    // Update the UI
+    renderBoard();
+
+    // Check for a winner or a tie
+    if (checkWinner()) {
+      displayWinnerNotification(`${currentPlayer} wins!`);
+      gameActive = false;
+    } else if (board.every(cell => cell !== '')) {
+      displayWinnerNotification('It\'s a tie!');
+      gameActive = false;
+    } else {
+      // Switch to the other player
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    }
+  }
+
+  // Render the current state of the board
+  function renderBoard() {
+    board.forEach((value, index) => {
+      const cell = boardElement.children[index];
+      cell.textContent = value;
+    });
+  }
+
+  // Check for a winner
+  function checkWinner() {
+    const winPatterns = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+      [0, 4, 8], [2, 4, 6]             // Diagonals
+    ];
+
+    return winPatterns.some(pattern => {
+      const [a, b, c] = pattern;
+      return board[a] !== '' && board[a] === board[b] && board[a] === board[c];
+    });
+  }
+
+  // Display winner notification
+  function displayWinnerNotification(message) {
+    winnerNotification.textContent = message;
+    winnerNotification.style.display = 'block';
+    setTimeout(() => {
+      winnerNotification.style.display = 'none';
+    }, 3000);
+  }
+</script>
+
+</body>
+</html>
